@@ -28,7 +28,7 @@ $(function () {
 
                loadLatestMessages(chatBox, 1);
 
-               chatBox.find(".chat-area").animate({scrollTop: chatBox.find(".chat-area").offset().top + chatBox.find(".chat-area").outerHeight(true)}, 800, 'swing');
+               chatBox.find(".chat-area").animate({scrollTop: 1000000}, 800, 'swing');
            }
        });
    });
@@ -66,21 +66,21 @@ $(function () {
     // that's already loaded on the chat box
     let lastScrollTop = 0;
 
-   $(".chat-area").on("scroll", function (e) {
-       let st = $(this).scrollTop();
+   // $(".chat-area").on("scroll", function (e) {
+   //     let st = $(this).scrollTop();
 
-       if(st < lastScrollTop) {
+   //     if(st < lastScrollTop) {
 
-           fetchOldMessages($(this).parents(".chat-opened").find("#to_user_id").val(), $(this).find(".msg_container:first-child").attr("data-message-id"));
-       }
+   //         fetchOldMessages($(this).parents(".chat-opened").find("#to_user_id").val(), $(this).find(".msg_container:first-child").attr("data-message-id"));
+   //     }
 
-       lastScrollTop = st;
-   });
+   //     lastScrollTop = st;
+   // });
 
-    // listen for the oldMsgs event, this event will be triggered on scroll top
-    channel.bind('oldMsgs', function(data) {
-        displayOldMessages(data);
-    });
+   //  // listen for the oldMsgs event, this event will be triggered on scroll top
+   //  channel.bind('oldMsgs', function(data) {
+   //      displayOldMessages(data);
+   //  });
 });
 
 /**
@@ -192,7 +192,7 @@ function send(to_user, message)
             chat_area.find(".loader").remove();
             chat_box.find(".btn-chat").prop("disabled", true);
             chat_box.find(".chat_input").val("");
-            chat_area.animate({scrollTop: chat_area.offset().top + chat_area.outerHeight(true)}, 800, 'swing');
+            chat_area.animate({scrollTop: 1000000}, 800, 'swing');
         }
     });
 }
@@ -293,29 +293,33 @@ function displayMessage(message)
 
         $("#chat_box_" + message.to_user_id).find(".chat-area").append(messageLine);
 
-    } else if($("#current_group").val() == message.group) {
+    } else{
 
         alert_sound.play();
 
         // for the receiver user check if the chat box is already opened otherwise open it
-        cloneChatBox(message.from_user_id, message.fromUserName, function () {
+        cloneChatBox(message.to_user_id, message.toUserName, function () {
 
-            let chatBox = $("#chat_box_" + message.from_user_id);
+            let chatBox = $("#chat_box_" + message.to_user_id);
 
             if(!chatBox.hasClass("chat-opened")) {
 
                 chatBox.addClass("chat-opened").slideDown("fast");
 
-                loadLatestMessages(chatBox, message.from_user_id);
+                loadLatestMessages(chatBox, message.to_user_id);
 
-                chatBox.find(".chat-area").animate({scrollTop: chatBox.find(".chat-area").offset().top + chatBox.find(".chat-area").outerHeight(true)}, 800, 'swing');
+                chatBox.find(".chat-area").animate({scrollTop: 1000000}, 800, 'swing');
             } else {
 
                 let messageLine = getMessageReceiverHtml(message);
 
                 // append the message for the receiver user
-                $("#chat_box_" + message.from_user_id).find(".chat-area").append(messageLine);
+                $("#chat_box_" + message.to_user_id).find(".chat-area").append(messageLine);
+                // chatBox.find(".chat-area").animate({scrollTop: 100}, 800, 'swing');
+
             }
+                chatBox.find(".chat-area").animate({scrollTop: 1000000}, 800, 'swing');
+            
         });
     }
 }

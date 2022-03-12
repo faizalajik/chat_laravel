@@ -3,6 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-5">
+            <label>User Login : {{ \Auth::user()->name }}</label>
             @if($users->count() > 0)
                 <h3>Pick a user to chat with</h3>
                 <!-- <ul id="users">
@@ -20,7 +21,7 @@
                 ?>
                 @endforeach
 
-                <li><span id="roomGroup" class="label label-info">group1</span> <a href="javascript:void(0);" class="chat-toggle" data-id="5" data-user="group">
+                <li><span id="roomGroup" class="label label-info">group1</span> <a href="javascript:void(0);" class="chat-toggle" data-id="5" data-user="group1">
                 Open chat</a></li>
                 <input type="hidden" name="name" id="name">
             @else

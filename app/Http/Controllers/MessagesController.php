@@ -29,6 +29,12 @@ class MessagesController extends Controller
             return;
         }
 
+        //         $messages = Message::where(function($query) use ($request) {
+        //     $query->where('to_user', 5);
+        // })->orWhere(function ($query) use ($request) {
+        //     $query->where('to_user', 5);
+        // })->orderBy('created_at', 'ASC')->limit(100)->get();
+
         $messages = Message::where(function($query) use ($request) {
             $query->where('group', 1);
         })->orderBy('created_at', 'ASC')->get();
