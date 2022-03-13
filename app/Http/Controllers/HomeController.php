@@ -28,7 +28,13 @@ class HomeController extends Controller
     public function index()
     {
         $users = User::where('id', '!=', Auth::user()->id)->get();
-        $group = DB::select('SELECT * FROM `users` where `group`=1');
+        $group = DB::select('SELECT
+    tb_group.id_group, 
+    tb_group.name_group
+FROM
+    tb_group
+WHERE
+    tb_group.id_user ='.Auth::user()->id);
 
 
         return view('home', compact('users'))

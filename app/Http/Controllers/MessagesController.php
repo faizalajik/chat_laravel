@@ -25,7 +25,7 @@ class MessagesController extends Controller
      */
     public function getLoadLatestMessages(Request $request)
     {
-        if(!$request->user_id) {
+        if(!$request->id_group) {
             return;
         }
 
@@ -34,9 +34,27 @@ class MessagesController extends Controller
         // })->orWhere(function ($query) use ($request) {
         //     $query->where('to_user', 5);
         // })->orderBy('created_at', 'ASC')->limit(100)->get();
-
-        $messages = Message::where(function($query) use ($request) {
-            $query->where('group', 1);
+        $g = DB::select('SELECT
+            users.id, 
+            users.`name`, 
+            tb_group.id_group, 
+            tb_group.name_group
+            FROM
+            users
+            INNER JOIN
+            tb_group
+            ON 
+            users.id = tb_group.id_user
+            INNER JOIN
+            messages
+            ON 
+            tb_group.id_group = messages.to_group
+            WHERE
+            users.id ='.Auth::user()->id.' AND tb_group.id_group ='.$request->id_group.' limit 1');
+        // print_r($g[0]->id_group);
+        // die;
+        $messages = Message::where(function($query) use ($request,$g) {
+            $query->where('to_group', $g[0]->id_group);
         })->orderBy('created_at', 'ASC')->get();
 
         $return = [];
@@ -65,12 +83,30 @@ class MessagesController extends Controller
 
         $message->from_user = Auth::user()->id;
 
-        $message->to_user = $request->to_user;
+        $message->to_group = $request->to_user;
 
         $message->content = $request->message;
-        $message->group = 1;
+        // $message->group = 1;
 
         $message->save();
+
+        $group = DB::select('SELECT
+            users.id, 
+            users.`name`, 
+            tb_group.id_group, 
+            tb_group.name_group
+            FROM
+            users
+            INNER JOIN
+            tb_group
+            ON 
+            users.id = tb_group.id_user
+            INNER JOIN
+            messages
+            ON 
+            tb_group.id_group = messages.to_group
+            WHERE
+            users.id ='.Auth::user()->id.' AND tb_group.id_group ='.$request->to_user.' limit 1');
 
 
         // prepare some data to send with the response
@@ -82,14 +118,28 @@ class MessagesController extends Controller
 
         $message->from_user_id = Auth::user()->id;
 
-        $message->toUserName = 'Group1';
+        $message->toUserName = $group[0]->name_group;
 
-        $message->to_user_id = 5;
-        $message->group = 1;
+        $message->to_group = $request->to_user;
 
-        PusherFactory::make()->trigger('chat', 'send', ['data' => $message]);
+        $user_group = DB::select('SELECT
+    t.id_group,
+    t.id_user 
+FROM
+   tb_group t 
+WHERE
+    t.id_user NOT IN (
+    SELECT
+        id_user 
+    FROM
+       tb_group 
+WHERE
+    id_group IN ( '.$request->to_user.'))
+    GROUP BY t.id_user');
 
-        return response()->json(['state' => 1, 'data' => $message]);
+        PusherFactory::make()->trigger('chat', 'send', ['data' => $message, 'user_group' => $user_group]);
+
+        return response()->json(['state' => 1, 'data' => $message, 'user_group' => $user_group]);
     }
 
 
@@ -110,15 +160,15 @@ class MessagesController extends Controller
 
         $lastMessages = Message::where(function($query) use ($request, $message) {
             $query->where('from_user', Auth::user()->id)
-                ->where('to_user', $request->to_user)
-                ->where('created_at', '<', $message->created_at);
+            ->where('to_user', $request->to_user)
+            ->where('created_at', '<', $message->created_at);
         })
-            ->orWhere(function ($query) use ($request, $message) {
+        ->orWhere(function ($query) use ($request, $message) {
             $query->where('from_user', $request->to_user)
-                ->where('to_user', Auth::user()->id)
-                ->where('created_at', '<', $message->created_at);
+            ->where('to_user', Auth::user()->id)
+            ->where('created_at', '<', $message->created_at);
         })
-            ->orderBy('created_at', 'ASC')->limit(10)->get();
+        ->orderBy('created_at', 'ASC')->limit(10)->get();
 
         $return = [];
 

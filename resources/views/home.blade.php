@@ -11,19 +11,13 @@
                         <li><span class="label label-info">{{ $user->name }}</span> <a href="javascript:void(0);" class="chat-toggle" data-id="{{ $user->id }}" data-user="{{ $user->name }}">Open chat</a></li>
                     @endforeach
                 </ul> -->
-                <?php $arr = array(); 
-                $name = array();
-                 ?>
-                @foreach($group as $g)
-                <?php
-                array_push($arr, $g->id);
-                array_push($name, $g->name);
-                ?>
-                @endforeach
-
-                <li><span id="roomGroup" class="label label-info">group1</span> <a href="javascript:void(0);" class="chat-toggle" data-id="5" data-user="group1">
+<!--  -->
+                    @foreach($group as $group)
+                <li><span id="roomGroup" class="label label-info">{{$group->name_group}}</span> <a href="javascript:void(0);" class="chat-toggle" data-id="{{$group->id_group}}" data-user="{{$group->name_group}}">
                 Open chat</a></li>
                 <input type="hidden" name="name" id="name">
+                    @endforeach
+
             @else
                 <p>No users found! try to add a new user using another browser by going to <a href="{{ url('register') }}">Register page</a></p>
             @endif
@@ -33,7 +27,6 @@
     @include('chat-box')
 
     <input type="hidden" id="current_user" value="{{ \Auth::user()->id }}" />
-    <input type="hidden" id="current_group" value="1" />
     <input type="hidden" id="pusher_app_key" value="{{ env('PUSHER_APP_KEY') }}" />
     <input type="hidden" id="pusher_cluster" value="{{ env('PUSHER_APP_CLUSTER') }}" />
 @stop
